@@ -1,0 +1,37 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+% You may be able to remove this if causing issues
+\pgfplotsset{compat=1.11}
+
+\begin{document}
+
+\begin{tikzpicture}
+  \pgfplotsset {
+    scale only axis,
+    axis equal image,
+    width=6in,
+    /pgf/number format/1000 sep={},
+    /tikz/maxline/.style={blue, thick, no marks},
+    /tikz/memline/.style={red, thick, no marks},
+    /tikz/maxlabel/.style={blue!40!black, right, fill=white, fill opacity=0.7, text opacity=1.0, rounded corners=2pt, inner sep=0.5pt},
+    /tikz/memlabel/.style={red!50!black, rotate=45, right, fill=white, fill opacity=0.7, text opacity=1.0, rounded corners=2pt, inner sep=0.5pt}
+  }
+
+  \def\Xmin{ERT_XRANGE_MIN}
+  \def\Xmax{ERT_XRANGE_MAX}
+
+  \begin{loglogaxis}[
+    title={ERT_TITLE},
+    grid=both,
+    grid style={black!50, densely dotted},
+    xlabel= FLOPs/Byte,
+    ylabel= GFLOPs/sec,
+    xmin=\Xmin,
+    xmax=\Xmax,
+    ymin=ERT_YRANGE_MIN,
+    ymax=ERT_YRANGE_MAX,
+    log ticks with fixed point
+    ]

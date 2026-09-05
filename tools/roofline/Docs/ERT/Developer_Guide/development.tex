@@ -1,0 +1,208 @@
+This chapter gives the details of how the Empirical Roofline Tool will be
+developed, tested, and released. This includes incorporating suggests and
+general feedback at all stages.
+
+Much of the initial groundwork has been completed.  We have experimented with
+a number of microkernels on a variety of machines.  From these experiments,
+we’ve been able to determine which codes give accurate bandwidth and GFLOP
+values which can be used to generate Roofline graphs for each machine.
+
+In addition, we’ve been able to structure the microkernels so they can be run
+with combinations of MPI processes, OpenMP threads, and GPU threads.  This
+allows us to characterize the hardware with a variety of different forms and
+combinations of parallelism.
+
+Other variations include the use of different compilers and compiler flags,
+the use of difference runtime environments and environment variables, and
+microkernels that express possible parallelism more explicitly.
+
+For a given experiment, the current microkernels are run with a wide range of
+array sizes and a wide range of trials per array size.  This allows the
+benchmarks to map out a fairly large parameter space for each microkernel.
+Currently, all this data is output for subsequent postprocessing.
+
+The postprocessing consists for averaging multiple runs and extracting
+bandwidth or GFLOP numbers.  In the case of bandwidth number, there are
+usually a number of plateaus which correspo0nd to the array fitting in each of
+the various portions of the memory hierarchy.
+
+\section{Next Steps}
+The next steps that need to be completed are:
+
+\begin{enumerate}
+
+\vspace{-0.1in}
+\item{Take the experimental codes that have been successful on all the machine
+      architectures and use them to design a single framework that will be
+      used by the Empirical Roofline Tool to generate bandwidth and GFLOP
+      values.}
+
+\vspace{-0.1in}
+\item{Define what raw data will be output by the unified framework in (1),
+      what postprocessing will be applied to the raw data, what the processed
+      data will be, and how it will be represented/externalized.}
+
+\vspace{-0.1in}
+\item{Determine what parameters will be automatically configured and which
+      will be specified by the user.}
+
+\vspace{-0.1in}
+\item{Develop the configuration system for the parameters that will be
+      automatically set such that it will work on all the target systems.}
+
+\vspace{-0.1in}
+\item{Develop a (simple) UI to gather the parameters that will be specified
+      by the user.}
+
+\vspace{-0.1in}
+\item{Test and debug the entire system on the target machines:  Hopper, Edison,
+      Mira, Titan (CPU), Babbage, Dirac, Titan (CPU+GPU).}
+
+\vspace{-0.1in}
+\item{Make the Empirical Roofline Tool available to other members of the
+      Roofline Toolkit effort along with the results gathered in (6).}
+
+\vspace{-0.1in}
+\item{Based on what is learned and the data collected, expand the set of
+      microkernels, vary the data access patterns, and expand the unified
+      framework to collect a larger range of data spanning more of the
+      multidimensional problem space.}
+
+\vspace{-0.1in}
+\item{Expand the configuration and testing to as many architectures and systems
+      as possible.}
+
+\vspace{-0.1in}
+\item{Fix and update the tool as needed, document, package, and release.}
+
+\end{enumerate}
+
+\section{Schedule}
+Here is the proposed schedule for the development outlined above:
+
+\begin{tabular}{|L{0.58\linewidth}|C{0.16\linewidth}|C{0.16\linewidth}|}
+\hline
+\multicolumn{1}{|c|}{Task}                                        & Scheduled Completion Date & Actual Completion Date \\
+\hhline{|=:=:=|}
+Basic investigation and experiments                               & End of Summer 2014        & End of Summer 2014 \\
+\hhline{|=:=:=|}
+Define data output format for all data - raw and processed        & \multirow{2}{*}{Sept. 8}  & \multirow{2}{*}{Sept. 29} \\
+\cline{1-1}
+Determine automatic and user specified parameters                 &                           & \\
+\hhline{|=:=:=|}
+Understand and combine experimental codes                         & Sept. 8                   & Sept. 29 \\
+\hhline{|=:=:=|}
+Develop the configuration system                                  & \multirow{2}{*}{Oct. 1}   & \multirow{2}{*}{Oct. 8} \\
+\cline{1-1}
+Develop a (simple) UI to gather user parameters                   &                           & \\
+\hhline{|=:=:=|}
+Test and debug on target architectures                            & \multirow{2}{*}{Nov. 1}   & \multirow{2}{*}{N/A} \\
+\cline{1-1}
+Release Empirical Roofline Tool internally                        &                           & \\
+\hhline{|=:=:=|}
+Expand coverage of microkernels, data access patterns, etc.       & \multirow{2}{*}{Dec. 1}   & \multirow{2}{*}{N/A} \\
+\cline{1-1}
+Expand configuration and testing                                  &                           & \\
+\hhline{|=:=:=|}
+Fix and update the tool as needed, document, package, and release & Jan. 1                    & N/A \\
+\hline
+\end{tabular}
+
+\section{SC 2014}
+
+For SC 2014 the following needs to be completed.  Text in gray has been
+completed:
+
+\begin{enumerate}
+
+\vspace{-0.1in}
+\item{Minimal Requirements:}
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{{\color{Gray}The ERT runs on Edison using flat MPI and produces the
+expected roofline (which may not be optimal).}}
+
+\item{{\color{Gray}The ERT runs on a Linux SMP ``node'' using pure OpenMP}
+and produces the expected roofline.}
+
+\item{{\color{Gray}A basic website is set up with some information about
+the ERT including a user's manual and code that can be downloaded.}}
+
+\item{{\color{Gray}Include in the user's manual appendices the rooflines
+we've generated for various architectures/machines.}}
+
+\item{Include in the user's manaul examples of running the ERT, the plots
+it produces, etc.}
+
+\item{``Spec'' values for bandwidth and gflop rate are added to the
+configuration file and propagated through to the final JSON output.  We may
+provide a capability/option of plotting them on the roofline.}
+
+{\color{Gray}
+\item{Add the bandwidth and gflop rate numbers to the roofline.}
+}
+
+\end{itemize}
+
+\vspace{-0.1in}
+\item{Second Level Requirements:}
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{The ERT runs on Edison with MPI+OpenMP over a range of MPI processes and
+threads and produces a near optimal roofline.}
+
+\item{Add a working set size or a range of sizes to the bandwidth and gflop
+rate labels on the roofline.}
+
+\end{itemize}
+
+\vspace{-0.1in}
+\item{Third Level Requirements:}
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{The ERT runs on Babbage in native mode using the MIC with pure OpenMP
+and gets the expected roofline.}
+
+\end{itemize}
+
+\vspace{-0.1in}
+\item{Fourth Level Requirements:}
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{The ERT runs on Mira and gets the expected roofline.}
+
+\end{itemize}
+
+\end{enumerate}
+
+\section{List Of Work To Do}
+
+This is a list of work that could be done to improve the ERT.  The work has
+been divided into several sections to help organize the tasks.  Of course,
+some work spans multiple sections and some falls in no specific section.
+
+For the former, one section was chosen.  For the latter, there is the
+``Miscellaneous'' section.  The goal is to make new specific sections as
+needed when any section gets too large.
+
+Also, completed work will not be deleted.  Initially, it will be ``grayed
+out'' in place and, eventually, it will be move to the end of the section or
+to a separate section for completed work.
+
+\subsection{Internal Tool Development}
+
+\subsection{Additional Tool Functionality And Options}
+
+\subsection{Validation And Verification Of The Tool}
+
+\subsection{Documentation}
+
+\subsection{Releasing The Tool}

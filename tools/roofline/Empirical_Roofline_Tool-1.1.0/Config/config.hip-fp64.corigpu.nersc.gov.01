@@ -1,0 +1,44 @@
+# ERT configuration for AMD Vega 10 XTX GPU
+# Host is odinson.lbl.gov
+
+ERT_RESULTS Results.hip-fp64.corigpu.01
+
+ERT_DRIVER  driver1
+ERT_KERNEL  kernel1
+
+ERT_HIP		True
+ERT_GPU         True
+ERT_GPU_CFLAGS  -O3 -gencode arch=compute_70,code=sm_70
+ERT_GPU_LDFLAGS 
+
+ERT_FLOPS   1,2,512,1024
+ERT_ALIGN   32
+
+ERT_CC      hipcc
+#ERT_CFLAGS  -I/global/project/projectdirs/mpccc/dwdoerf/cori-gpu/hip/install/rocm-3.8.0/include
+ERT_CFLAGS  
+
+ERT_LD      hipcc
+ERT_LDFLAGS 
+ERT_LDLIBS  
+
+ERT_RUN     srun -n 1 ./ERT_CODE
+
+ERT_PRECISION FP64
+
+ERT_BLOCKS_THREADS 262144
+ERT_GPU_BLOCKS     8192,4096,2048,1024
+ERT_GPU_THREADS    32,64,128,256
+
+ERT_NUM_EXPERIMENTS 3
+
+ERT_WSS_MULT 1.3
+
+ERT_MEMORY_MAX 1073741824
+
+ERT_WORKING_SET_MIN 512
+
+ERT_TRIALS_MIN 32
+
+ERT_GNUPLOT gnuplot
+

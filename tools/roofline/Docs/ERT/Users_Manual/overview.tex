@@ -1,0 +1,80 @@
+\subsection{Overview}
+
+The Roofline Performance Model for computational performance has been shown
+to be a useful simplification of the complexity of processor and memory
+systems.  An overview of this model can be found at:
+
+https:\+//crd.lbl.gov/\+departments/\+computer-science/\+performance-and-al\+go\+rith\+ms-research/\+research/\+roofline
+
+This site also contains pointers to available software, such as this tool, and
+references to publications pertaining to the Roofline Performance Model.
+
+The Roofline Toolkit was created to help software developers use the Roofline
+Performance Model to improve the performance of their codes.  One of the
+requirements for using the Roofline Performance Model is having a roofline
+characterization of the target machine.
+
+In the past, this characterization was obtained from the machine
+specification data.  This was time consuming and error prone.  In addition, it
+lead to theoretical maximums that might not be achievable by any code running
+on the machine.
+
+The Empirical Roofline Tool, ERT, generates the required characterization of a
+machine empirically.  It does this by running kernel codes on the machine so
+the results are, by definition, attainable by some code(s) and the options
+used to compile and run the code are known.  The ERT generates the bandwidth
+and gflop/sec data needed by the Roofline Performance Model.
+
+The input to the ERT is a configuration file and the final output is a
+roofline graph in PostScript format and the roofline parameters in JSON
+format.  There is also a significant amount of intermediate data generated
+that can be explored and used to better understand a given kernel code and
+machine.
+
+Currently, the ERT can utilize MPI, OpenMP, and Cuda/GPU for parallelization.
+
+\subsection{Installation}
+
+To install ERT, you simply need to use ``git'' to ``clone'' the Roofline
+Toolkit located at https:\+//bitbucket.org/\+berkeleylab/\+cs-roofline-toolkit
+on your local machine.
+
+The ERT is under ``Empirical\_Roofline\_Tool-1.1.0''.  There you will find a
+``README'' file, a PDF of this document (``ERT\_Users\_Manual.pdf''), the ERT
+executable (``ert''), some sample configuration files
+(``Config/config.ert.*''), and everything else used by the ERT.
+
+To complete the installation, you need to make sure you have a few other
+pieces of software installed:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{Python that is at least version 2.6 and below version 3.x}
+
+\vspace{-0.1in}
+\item{GNUplot that is at least version 4.2.x}
+
+\end{itemize}
+
+To run in parallel, using MPI, OpenMP, and/or Cuda/GPU, you will need:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{A working installation of MPI}
+
+\vspace{-0.1in}
+\item{A compiler and operating system that supports OpenMP code generation,
+compiling, linking, and running}
+
+\vspace{-0.1in}
+\item{A compiler, operating system, and hardware that supports Cuda/GPU
+code generation, compiling, linking, and running}
+
+\end{itemize}
+
+If you problems using the ERT, please read the section on troubleshooting the
+ERT.  It contains suggestions that the developers and testers have used when
+trying to correct problems running the ERT on new machines with new
+configuraiton files.

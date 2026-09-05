@@ -1,0 +1,56 @@
+# Cori-GPU cluster:
+
+ERT_RESULTS Results.sycl.corigpu.01
+
+ERT_DRIVER  driver1
+ERT_KERNEL  kernel1
+#with mode ERT_SYCL, the kernel run is always the SYCL kernel written in driver1.cxx in a single source manner
+
+
+ERT_FLOPS   1,2,64,128,256
+ERT_ALIGN   32
+
+#
+# Intel/LLVM
+# $ module list
+# Currently Loaded Modulefiles:
+#  1) esslurm                 2) modules/3.2.11.4        3) opencl-loader           4) dpc++/11.0.0-20200719
+ERT_CC      clang++
+ERT_CFLAGS  -std=c++17 -O3 -ffast-math -fsycl -fsycl-targets=nvptx64-nvidia-cuda-sycldevice -Xsycl-target-backend '--cuda-gpu-arch=sm_70'
+ERT_LD      clang++
+ERT_LDFLAGS -std=c++17 -O3 -ffast-math -fsycl -fsycl-targets=nvptx64-nvidia-cuda-sycldevice -Xsycl-target-backend '--cuda-gpu-arch=sm_70'
+ERT_LDLIBS  -lOpenCL
+#
+# Alternatively, Codeplay ComputeCpp
+# Currently Loaded Modulefiles:
+#  1) esslurm            3) computecpp/2.1.0   5) cudnn/7.6.5
+#  2) modules/3.2.11.4   4) jdk/1.8.0_202      6) cuda/10.2.89
+# $export CPATH=$CUDA_ROOT/include:$CPATH
+# $export LD_LIBRARY_PATH=$CUDA_ROOT/lib64:$LD_LIBRARY_PATH
+# $export LIBRARY_PATH=$CUDA_ROOT/lib64:$LIBRARY_PATH
+#ERT_CC      compute++
+#ERT_CFLAGS  -std=c++17 -O3 -ffast-math -sycl-driver -sycl-target ptx64 -no-serial-memop
+#ERT_LD      compute++
+#ERT_LDFLAGS -std=c++17 -O3 -ffast-math -sycl-driver -sycl-target ptx64
+#ERT_LDLIBS  -lComputeCpp -lOpenCL
+
+ERT_RUN     srun ./ERT_CODE
+
+# FP64 | FP32
+ERT_PRECISION   FP64
+
+ERT_SYCL       True
+
+# Global_work_size:Local_work_size
+ERT_SYCL_SIZES   163840:64,163840:128,163840:256,163840:512,163840:1024
+
+ERT_NUM_EXPERIMENTS 1
+
+ERT_MEMORY_MAX 1073741824
+
+ERT_WORKING_SET_MIN 128
+
+ERT_TRIALS_MIN 1
+
+ERT_GNUPLOT gnuplot
+

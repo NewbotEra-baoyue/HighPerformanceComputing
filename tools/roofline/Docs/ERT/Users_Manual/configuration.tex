@@ -1,0 +1,318 @@
+To configure the ERT, you need to create a configuration file that is setup
+correctly for the machine you will be testing.  Several examples
+are provided with the ERT distribution.  They are located at under ``Config''
+in the installation directory and are named ``config.*''.
+
+In addition to the example configuration files, there are corresponding batch
+scripts under ``Batch'' (for systems with batch queues) and results under
+``Results''.
+
+The examples currently provided are:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``config.babbage.nersc.gov.01'' - An example configured for testing a
+Knight's Corner (KNC) node using various combinations of MPI and OpenMP to
+exercise the host and not the MIC .}
+
+\vspace{-0.1in}
+\item{``config.babbage.nersc.gov.02'' - An example configured for testing a
+Knight's Corner (KNC) node using OpenMP to exercise the MIC and not the host.}
+
+\vspace{-0.1in}
+\item{``config.edison.nersc.gov.01'' - An example configured for a
+Cray XC30 node (2 x 12-core Intel "Ivy Bridge" processors) using various
+combinations of MPI and OpenMP.}
+
+\vspace{-0.1in}
+\item{``config.madonna.lbl.gov.01'' - An example configured for a
+Linux workstation (8-core Intel Xeon CPU E5530, 2.4 GHz) using various
+combinations of MPI and OpenMP.}
+
+\vspace{-0.1in}
+\item{``config.madonna.lbl.gov.02'' - An example configured for a
+Linux workstation (8-core Intel Xeon CPU E5530, 2.4 GHz) using only OpenMP.}
+
+\vspace{-0.1in}
+\item{``config.mira.alcf.anl.gov.01'' - An example configured for a
+IBM Blue Gene/Q node (16 1600 MHz PowerPC A2 cores) using various
+combinations of MPI and OpenMP.}
+
+\vspace{-0.1in}
+\item{``config.titan.ccs.ornl.gov.01'' - An example configured for a
+Cray XK7 node (host: 16-core 2.2 GHz AMD Opteron 6274 (Interlagos) processor)
+using various combinations of MPI and OpenMP.}
+
+\vspace{-0.1in}
+\item{``config.titan.ccs.ornl.gov.02'' - An example configured for a
+Cray XK7 node (GPU: NVIDIA Kepler accelerator) using various number of
+thread-blocks and threads-per-block.}
+
+\vspace{-0.1in}
+\end{itemize}
+
+Looking at these examples will help clarify all the descriptions and
+definitions below.
+
+In general, the configuration file contains lines that define the parameters
+needed by the ERT to compile the specified drivers and kernels, run them over a
+range of MPI, OpenMP, and Cuda/GPU settings, gather the results, and generate
+the final roofline characterization of the machine.
+
+Starting with an example configuration file (see above) and modifying it is
+probably the best way to get started.  In the next sections, all the ERT
+configuration directives will be explained so you can understand the examples
+and make your own configuration files.
+
+If you problems using the ERT with your configuration file, please read the
+section on troubleshooting the ERT.  It contains suggestions that the
+developers and testers have used when trying to correct problems running
+the ERT with new configuraiton files.
+
+\subsection{Terminology}
+
+Anytime a ``set of integers'' is mentioned below it refers to a comma
+separated list where each entry can be a single integer or a range of
+integers specified by two integers separated by a hyphen.  For example:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``8'' - Just the integer 8.}
+
+\vspace{-0.1in}
+\item{``1,2,4'' - The integers 1, 2, and 4.}
+
+\vspace{-0.1in}
+\item{``1-8'' - The integers 1, 2, 3, 4, 5, 6, 7, and 8.}
+
+\vspace{-0.1in}
+\item{``1,2,6-8'' - The integers 1, 2, 6, 7, and 8.}
+
+\end{itemize}
+
+\subsection{Comment Lines}
+
+Any line beginning with a ``\#'' character is treated as a comment and will not
+be used by the ERT.  Currently, comments and the comment character are not
+allowed mid-line.  If they appear mid-line, they will simply be considered
+part of the line and used by the ERT.
+
+\subsection{Storing Results}
+To specify where results will be stored:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``ERT\_\+RESULTS'' - this specifies the directory where all results of
+running the ERT will be kept.  If this it is a relative path, it will be
+relative to the directory you are in when you run the ERT.  If this is an
+absolute path, the same directory will be used every time this configuration
+file is specified regardless of where you are when you run the ERT.}
+
+\end{itemize}
+
+\subsection{Specification Performance Numbers}
+To specify roofline performance numbers based on the machine specification,
+i.e., theoretical performance numbers:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``ERT\_\+SPEC\_\+GBYTES\_\+L\#'' - Give the theoretical maximum bandwidth in
+GBytes/sec for the L\# cache on the machine being tested.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+SPEC\_\+GBYTES\_\+DRAM'' - Give the theoretical maximum bandwidth in
+GBytes/sec for the DRAM on the machine being tested.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+SPEC\_\+GFLOPS'' - Give the theoretical maximum computation rate
+in GFLOPs/sec for the machine being tested.}
+
+\vspace{-0.1in}
+\end{itemize}
+
+These numbers are passed along as metadata and are available in the final JSON
+roofline output generated by the ERT.
+
+\subsection{Building the Code}
+To specify which code to build and how to build it:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``ERT\_\+DRIVER'' - the driver code to use with the selected kernel code
+(see below).  There is currently only one driver, ``driver1''.  The ERT looks
+for ``ERT\_\+DRIVER.c'' in ``Drivers'' under the ERT installation directory.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+KERNEL'' - the kernel code to use with the selected driver code
+(see above).  There is currently only one kernel, ``kernel1''.  The ERT looks
+for ``ERT\_\+KERNEL.c'' in ``Kernel'' under the ERT installation directory.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+MPI'' - ``False'' to compile without MPI and ``True'' to compile
+with MPI.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+MPI\_\+CFLAGS'' - if ``ERT\_\+MPI'' is ``True'', compilation flags
+specific to MPI that are needed or wanted.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+MPI\_\+LDFLAGS'' - if ``ERT\_\+MPI'' is ``True'', linking/loading flags
+specific to MPI that are needed or wanted.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+OPENMP'' - ``False'' to compile without OpenMP and ``True'' to
+compile with OpenMP.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+OPENMP\_\+CFLAGS'' - if ``ERT\_\+OPENMP'' is ``True'',
+compilation flags specific to OpenMP that are needed or wanted.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+OPENMP\_\+LDFLAGS'' - if ``ERT\_\+OPENMP'' is ``True'',
+linking/loading flags specific to OpenMP that are needed or wanted.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+GPU'' - ``False'' to compile without the Cuda code and
+``True'' to compile with Cuda code.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+GPU\_\+CFLAGS'' - if ``ERT\_\+GPU'' is ``True'',
+compilation flags specific to the Cuda code that are needed or wanted.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+GPU\_\+LDFLAGS'' - if ``ERT\_\+GPU'' is ``True'',
+linking/loading flags specific to the Cuda code that are needed or wanted.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+FLOPS'' - A set of integers\footnote
+{In this context, a ``set of integers'' is a comma separated list where each
+entry can be a single integer or a range of integers specified by two integers
+separated by a hyphen.  For example, ``8'' or ``1,2,4'' or ``1-8'' or
+``1,2,6-8''}
+specifying the FLOPS per computational element (in the current case an 8
+byte, double precision floating point number).  This is specific to the
+current driver/kernel pair and will probably be generalized in the future.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+ALIGN'' - An integer specifies the alignment (in bits) of the
+data being manipulated.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+CC'' - The compiler to use to build the ERT test(s).}
+
+\vspace{-0.1in}
+\item{``ERT\_\+CFLAGS'' - The flags to use when compiling the code.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+LD'' - The linker/loader to use to build the ERT code(s).}
+
+\vspace{-0.1in}
+\item{``ERT\_\+LDFLAGS'' - The flags to use when linking/loading the code.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+LDLIBS'' - Explicit libraries to include when linking/loading
+the code.}
+
+\end{itemize}
+
+\subsection{Running the Kernel}
+To specify how to run the kernel once it is built:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``ERT\_\+RUN'' - This is a command that is used almost verbatim to run the
+driver/kernel code that is built.  There are three strings that are replaced
+wherever they appear in this command to customize the command:}
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``ERT\_\+OPENMP\_\+THREADS'' - The number of OpenMP threads being run.}
+
+\item{``ERT\_\+MPI\_\+PROCS'' - The number of MPI processes being run.}
+
+\item{``ERT\_\+CODE'' - The current code being run.}
+
+\end{itemize}
+
+In addition, when ``ERT\_\+GPU'' is ``True'', two arguments are added to
+``ERT\_\+RUN'' command:  The number of thread-blocks and the number of
+threads-per-block.
+\end{itemize}
+
+\subsection{MPI, OpenMP, and Cuda/GPU}
+To specify valid combinations of MPI processes, OpenMP threads, GPU
+thread-blocks, and GPU thread-per-block:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``ERT\_\+PROCS\_\+THREADS'' - A set of integers that constrain valid
+products of the number of MPI processes and the number of OpenMP threads.
+For example, if this is `8' then only combinations of MPI processes and
+OpenMP threads have to multiply to give 8, e.g., 2 and 4, 8 and 1, are run.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+MPI\_\+PROCS'' - A set of integers specifying possible number of
+MPI processes to run.  These are subject to constraints imposed above.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+OPENMP\_\+THREADS'' - A set of integers specifying possible
+number of OpenMP threads to run.  These are subject to constraints imposed
+above.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+BLOCKS\_\+THREADS'' - A set of integers that constrain valid
+products of the number of thread-blocks and the number threads-per-block.
+For example, if this is `28672' then only combinations of thread-blocks and
+threads-per-block have to multiply to give 28672, e.g., 28 and 1024, 448 and
+64, are run.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+GPU\_\+BLOCKS'' - A set of integers specifying possible
+number of thread-blocks to run.  These are subject to constraints imposed
+above.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+GPU\_\+THREADS'' - A set of integers specifying possible
+number of threads-per-block to run.  These are subject to constraints imposed
+above.}
+
+\end{itemize}
+
+\subsection{Miscellaneous}
+Some miscellaneous parameters:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``ERT\_\+NUM\_\+EXPERIMENTS'' - The number of times to rerun the same code
+with all the parameters set the same.  This is used to get a statistical
+sample since performance can sometimes vary without changing the local
+experiment.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+MEMORY\_\+MAX'' - The maximum number of bytes to allocate/use for
+the entire run.  These are divided up across MPI processes and OpenMP
+threads.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+WORKING\_\+SET\_\+MIN'' - The minimum size (in 8-byte, double
+precision floating point numbers) for an individual process/thread working
+set.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+TRIALS\_\+MIN'' - The minimum number of times to repeatly run
+the loop over the working set.  This will be the maximum number of trials when
+the working set is the largest and it will scale up so the product of the
+maximum number of trails and the working set size are approximately constant.}
+
+\vspace{-0.1in}
+\item{``ERT\_\+GNUPLOT'' - How GNUplot is invoked.}
+
+\end{itemize}

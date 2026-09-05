@@ -1,0 +1,65 @@
+\documentclass[12pt,titlepage]{article}
+
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epsfig}
+\usepackage[bottom]{footmisc}
+
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\def\+{\discretionary{}{}{}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.1in}
+\setlength{\skip\footins}{0.25in}
+
+\title{Empirical Roofline Tool \\
+       User's Manual
+      }
+
+\author{Terry J. Ligocki \\
+        Leonid Oliker \\
+        Brian Van Straalen \\
+        Sam Williams \\
+        Nicholas Wright \\
+        Matthew Cordery \\
+        Wyatt Spears \\
+        Linda Lo
+       }
+
+\begin{document}
+
+\maketitle
+
+\pagenumbering{gobble}
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+
+\section{Overview and Installation}
+\label{section:overview}
+\input{overview.tex}
+
+\section{Configuration}
+\label{section:configuration}
+\input{configuration.tex}
+
+\section{Running}
+\label{section:running}
+\input{running.tex}
+
+\section{Extended Use}
+\label{section:extended}
+\input{extended.tex}
+
+\section{Troubleshooting}
+\label{section:trouble}
+\input{trouble.tex}
+
+\end{document}

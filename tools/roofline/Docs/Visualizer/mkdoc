@@ -1,0 +1,10 @@
+#!/bin/csh -f
+# Start with a LaTeX document and produce a DVI and PostScript version.
+set target=GUI_Users_Manual
+latex $target.tex
+bibtex $target
+latex $target.tex
+latex $target.tex
+latex $target.tex
+dvips -f -D 600 -t letter $target.dvi > $target.ps
+dvips -Ppdf -Pamz -Pcmz -t letter -D 8000 -o - $target.dvi | ps2pdf - $target.pdf

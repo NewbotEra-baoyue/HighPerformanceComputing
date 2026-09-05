@@ -1,0 +1,115 @@
+\newcommand{\hiddensubsection}[1]{
+  \stepcounter{subsection}
+  \subsection*{\Alph{chapter}.\arabic{section}.\arabic{subsection}\hspace{1em}{#1}}
+} 
+
+This is a colleciton of miscellaneous details gathered from Sam Williams or
+found while developing and testing the Roofline Toolkit.
+
+\section{Compiler Flags}
+
+\hiddensubsection{Intel Compiler}
+\begin{verbatim}
+icc -O3 -fno-alias -fno-fnalias -openmp $ARCH
+
+$ARCH is "-msse3" (Hopper)
+         "-xAVX"  (Edison)
+         "-mmic"  (Babbage/MIC/Xeon Phi/Knights Corner/KNC/...)
+\end{verbatim}
+
+\hiddensubsection{GCC}
+\begin{verbatim}
+gcc -O3 -fopenmp -fno-strict-aliasing
+\end{verbatim}
+
+\hiddensubsection{BlueGeneQ}
+\begin{verbatim}
+mpixlc_r -O5 -qsmp=omp:noauto ...
+\end{verbatim}
+
+\section{Environment Variables}
+
+\hiddensubsection{Linux/Intel Compiler}
+\begin{verbatim}
+setenv KMP_AFFINITY compact
+                    scatter
+                    balanced (MIC only)
+\end{verbatim}
+Also, \verb|KMP_AFFINITY| has verbose and granularity options so you can
+see what you're doing and how the hardware multithreading is changing your
+view of the machine, for example:
+\begin{verbatim}
+setenv KMP_AFFINITY=granularity=fine,compact,1,0
+\end{verbatim}
+
+\hiddensubsection{Linux/GCC}
+\begin{verbatim}
+setenv GOMP_CPU_AFFINITY ???
+numactl [options] -- command {arguments}
+\end{verbatim}
+
+\section{Running}
+
+\hiddensubsection{Hopper}
+\begin{verbatim}
+aprun -n 4 -d 6 -N 4 -S 1 -ss -cc numa_node <executable>
+\end{verbatim}
+
+\hiddensubsection{Edison}
+\begin{verbatim}
+aprun -n 2 -d 12 -N 2 -S 1 -ss -cc numa_node <executable>
+\end{verbatim}
+
+\hiddensubsection{Babbage}
+\begin{verbatim}
+setenv OMP_NUM_THREADS 240
+mpirun.mic -n 1 -host <hostname> -ppn 1 <executable>
+\end{verbatim}
+
+\hiddensubsection{BlueGeneQ}
+\begin{verbatim}
+qsub -t 00:10:00 -n 1 -A BGQtools_esp \
+     --proccount 1 \
+     --mode c1 \
+     --env BG_SHAREDMEMSIZE=32MB:PAMID_VERBOSE=1:\
+           BG_COREDUMPDISABLED=1:BG_SMP_FAST_WAKEUP=YES:\
+           BG_THREADLAYOUT=1:OMP_PROC_BIND=TRUE:\
+           OMP_NUM_THREADS=64:OMP_WAIT_POLICY=active\
+     <executable>
+\end{verbatim}
+You could also run 8 processes per node:
+\begin{verbatim}
+qsub -t 00:10:00 -n 1 -A BGQtools_esp \
+     --proccount 8 \
+     --mode c8 \
+     --env BG_SHAREDMEMSIZE=32MB:PAMID_VERBOSE=1:\
+           BG_COREDUMPDISABLED=1:BG_SMP_FAST_WAKEUP=YES:\
+           BG_THREADLAYOUT=2:OMP_PROC_BIND=TRUE:\
+           OMP_NUM_THREADS=8:OMP_WAIT_POLICY=active\
+     <executable>
+\end{verbatim}
+Where \verb|-n| is the number of nodes, \verb|--proccount| is the number of
+processes, and \verb|--mode| is the number of processes per node.
+\begin{verbatim}
+setenv BG_THREADLAYOUT 2 <==> setenv KMP_AFFINITY compact
+setenv BG_THREADLAYOUT 1 <==> setenv KMP_AFFINITY scatter
+\end{verbatim}
+They have a balanced option but it's a kludge.
+
+\section{Maximum FLOP Rate}
+This is computed a priori with a formula resembling:
+\begin{verbatim}
+A * CPU-frequency * cores * M
+
+A = 1 (simple CPU/FPU)
+    2 (FMA, +/*)
+
+M =  1 (simple CPU)
+     2 (SSE)
+     4 (AVX/QPX)
+     8 (MIC)
+    64 (K20 - 192/3)
+\end{verbatim}
+To achieve this on some (most?) current architecture instruction level
+parallelism, ILP, (implicit or explicit) may be needed.  This is necessary to
+make sure the internal pipelines feeding the arithmetic units stay filled.

@@ -1,0 +1,12 @@
+The Roofline Visualizer is implemented in JavaFX and requires Java version 8 or greater to run. Launch the visualizer from the command line by running the script RooflineVisualizer.sh inside the directory containing RooflineChart.jar. Alternatively run the jar directoy with the command "java -jar \{path to jar\}/RooflineChart.jar".
+
+After launching the Roofline Visualizer you can load Roofline .json files from the local filesystem with the Load button. Roofline .json files are generated when the ERT is run. Alternatively you may load the remote Roofline repository hosted by the University of Oregon by clicking on the "Load Remote" button. The remote repository contains a selection of oofline data collected from an array of computing platforms. 
+
+Sources with multiple Roofline datasets will populate the drop-down list in the upper left part of the window. The Filter button will open a dialog where you can select specific metadata values for the available metadata fields in the loaded Roofline data. Only Rooflines that match the selected metadata values will be shown.
+
+The Roofline chart will display the Roofline metrics, labeled according to the key below the chart. The exact values at the intersection points may be seen by mousing over the points on the chart.
+
+Some Roofline datasets may include heatmap data. When one of these is loaded in addition to the Roofline chart a heatmap chart tab will also be available. Mouse over individual grid cells in the heatmap to see the precise data values.
+
+%If you have access to a TAU profile database with data corresponding to a loaded Roofline you may select the database, database view and trial and then select a function from the application to plot on the Roofline. Note that this feature is not yet officially supported. The application metrics selected for display on the Roofline chart may not correspond to the metrics used in the system Roofline.
+

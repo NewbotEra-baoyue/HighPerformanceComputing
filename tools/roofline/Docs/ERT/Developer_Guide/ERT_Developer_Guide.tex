@@ -1,0 +1,60 @@
+\documentclass[12pt]{report}
+
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epsfig}
+\usepackage[usenames,dvipsnames]{color}
+
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.1in}
+
+\title{Empirical Roofline Tool \\
+       Developer Guide
+      }
+
+\author{Terry J. Ligocki \\
+        Leonid Oliker \\
+        Brian Van Straalen \\
+        Sam Williams \\
+        Nicholas Wright \\
+        Matthew Cordery \\
+        Wyatt Spears \\
+        Linda Lo
+       }
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Overview}
+\label{chapter:overview}
+\input{overview.tex}
+
+\chapter{Development}
+\label{chapter:development}
+\input{development.tex}
+
+\chapter{Usage}
+\label{chapter:usage}
+\input{usage.tex}
+
+\chapter{Future Work}
+\label{chapter:future}
+\input{future.tex}
+
+\appendix
+\chapter{Miscellaneous Details}
+\label{appendix:details}
+\input{details.tex}
+
+\end{document}

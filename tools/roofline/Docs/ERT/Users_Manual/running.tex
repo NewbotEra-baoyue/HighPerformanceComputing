@@ -1,0 +1,321 @@
+On one level, running the ERT is straightforward.  Simply invoke the ``ert''
+command with a single command line argument which specifies the file that has
+the configuration information.  If all goes well, the tool runs to completion
+and at the end tells you the location of resulting the roofline graph file 
+and JSON database file.
+
+The ``ert'' command has the following command line options:
+\begin{verbatim}
+    --version          show program's version number and exit
+    -h, --help         show this help message and exit
+    --verbose=VERBOSE  Set the verbosity of the screen output
+                       [default = 1].
+                       = 0 : no output,
+                       = 1 : outlines progress,
+                       = 2 : good for debugging (prints all
+                             commands)
+    --quiet            Don't generate any screen output,
+                       '--verbose=0'
+
+    Build options:
+      --build          Build the micro-kernels [default]
+      --no-build       Don't build the micro-kernels
+      --build-only     Only build the micro-kernels
+
+    Run options:
+      --run            Run the micro-kernels [default]
+      --no-run         Don't run the micro-kernels
+      --run-only       Only run the micro-kernels
+
+    Post-processing options:
+      --post           Run the post-processing [default]
+      --no-post        Don't run the post-processing
+      --post-only      Only run the post-processing
+      --gnuplot        Generate graphs using GNUplot [default]
+      --no-gnuplot     Don't generate graphs using GNUplot
+\end{verbatim}
+The ``verbose''/``quiet'' options allow the user to control the amount of
+diagnostic output produced when the ``ert'' command is executed:
+\begin{verbatim}
+    --verbose=0, -quiet  No diagnostic output is generated
+
+    --verbose=1          An outline is produced as the code
+                         is running showing its progress (default)
+
+    --verbose=2          An outline and list of commands being
+                         executed are produced as the code
+                         is running showing the details of
+                         its progress
+\end{verbatim}
+The ``build''/``no-build''/``build-only'', ``run''/``no-run''/``run-only'', and
+``post''/``no-post''/``post-only'' options allow the user to
+control what is done during the current execution of ``ert''.  By default, the
+micro-kernels are built, run, and the results are post-processed to generate
+the final roofline outputs.
+
+It is sometimes necessary to build the micro-kernels on a host machine,
+run them on the target machine, and post-process them somewhere else entirely.
+This would be accomplished by:
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{Running ``ert'' on the host machine with the ``-{}-build-only'' option.}
+
+\vspace{-0.1in}
+\item{Transferring the entire ERT\_\+RESULT directory created to the target
+      machine.}
+
+\vspace{-0.1in}
+\item{Running ``ert'' on the target machine with the ``-{}-run-only'' option
+      using exactly the same configuration file as on the host.}
+
+\vspace{-0.1in}
+\item{Transferring the entire updated ERT\_\+RESULT directory to the
+      post-processing machine.}
+
+\vspace{-0.1in}
+\item{Running ``ert'' on the target machine with the ``-{}-post-only'' option
+      using exactly the same configuration file as on the host.}
+
+\end{itemize}
+This is only one example using the build, run, and post-process options.
+Other permutations are possible to accommodate needs.
+
+There is also the ``gnuplot/no-gnuplot'' options which can be used to control
+if GNUplot is used to produce graphs (in PostScript format) during the
+post-processing.  If GNUplot isn't available or you don't want these graphs,
+simply use the ``-{}-no-gnuplot'' option.
+
+Of course, this is simply the ``tip of the iceberg''.  What actually happened?
+Where did everything get stored and processed?  What do you do if final
+results don't look reasonable?  The sections below give more detailed
+information about the ERT that can help answer these questions when they
+arise.
+
+Also, if you are having trouble getting the ERT to run with your configuration
+file use the ``-{}-verbose=2'' option.  This usually gives enough information
+to help diagnose the problem.  If not, see the section on troubleshooting the
+ERT.
+
+\subsection{Overall Run Structure}
+
+When the ERT is run with a configuration file, e.g.
+``ert Config/\+config.\+edison.\+nersc.\+gov.\+01'', it proceeds as
+follows:
+
+\begin{enumerate}
+
+\vspace{-0.1in}
+\item{Output the version number of the release.}
+
+\vspace{-0.1in}
+\item{Read the configuration file.}
+
+\vspace{-0.1in}
+\item{Check to see if there is an existing output directory with the same
+configuration file.  If so, use that directory.  If not, create a new output
+directory and copy the current configuration file there.}
+
+\vspace{-0.1in}
+\item{For each value specified by ``ERT\_\+FLOP'':}
+
+\vspace{-0.1in}
+\begin{enumerate}
+
+\item{Build the roofline characterization code with that number of FLOPs per
+element.}
+
+\item{For each number of MPI processes specified by ``ERT\_\+MPI\_\+PROCS'' and
+each number of OpenMP threads specified by ``ERT\_\+OPENMP\_\+THREADS:}
+
+\begin{enumerate}
+
+\item{If the product of the number of MPI processes and OpenMP threads isn't
+one of the numbers specified by ``ERT\_\+PROCS\_\+THREADS'' go back to the
+previous step.}
+
+\item{If this is a new output directory, run the code as many times as
+``ERT\_\+NUM\_\+EXPERIMENTS'' specifies and save all the results.  If not, skip
+this step - the code has already been run in this configuration.}
+
+\item{Process the output to produce local results including a variety of
+graphs generated by GNUplot in PostScript format.}
+
+\end{enumerate}
+
+\end{enumerate}
+
+\vspace{-0.1in}
+\item{Gather all the results to produce the final roofline results as a graph
+generated by GNUplot in PostScript format and a JSON output file.  Report the
+location of these two files.}
+
+\vspace{-0.1in}
+\end{enumerate}
+
+The next sections give more details about these steps and the data they
+generate.
+
+\subsection{Storing Results}
+
+When the ERT is run two forms of output are generated.  The obvious one is
+all output that goes to the screen by default.  Redirecting it to a file is a
+good idea so you can review it later if there is a problem.
+
+In the future, this output will probably go directly to a log file and there
+will be a way of controlling the verbosity of the output, especially what goes
+directly to the screen.
+
+The other output goes to files in a directory structure below the
+``ERT\_\+RESULTS'' directory.  If the ``ERT\_\+RESULTS'' directory doesn't
+exist the ERT attempts to create it.  Otherwise, it looks in the directory
+for any files of the form ``Run.\#''.  If it finds any, it checks the
+configuration file stored under them to see if they match the current
+configuration file specified on the command line.
+
+At the moment, this match must be exact in every character.  Eventually, this
+will be relaxed as much as possible to detect functional equivalence.
+
+If a match is found, the ERT attempts to continue running and storing results
+under the matching ``Run.\#'' directory.  If no match is found, the ERT
+creates a new ``Run.\#'' directory where ``\#'' is the smallest positive
+integer not currently being used.
+
+Once this directory has been found or created, the current configuration file
+is copied there.  This is also the location of the roofline graph file
+and the JSON database file when the run completes.
+
+Under the ``Run.\#'', the ERT creates one directory for each of the
+``ERT\_\+FLOPS'' values.  These directories are named ``FLOPS.\#'' where
+``\#'' is a three digit, zero padded number.  An executable is built in
+each of these directories as the value being used changes the code being
+compiled.
+
+Under each ``FLOPS.\#'' directory, the ERT creates directories and
+subdirectories for type of parallelism turned on in the configuration file.
+The nesting of the directories is in the order:  MPI processes, OpenMP
+threads, Cuda/GPU thread-blocks, Cuda/GPU threads-per-block.
+
+If any of these forms of parallelism are turned off, subdirectories are not
+created for them.  The names of the subdirectories are:  ``MPI.\#'' for the
+number of MPI processes, ``OpenMP.\#" for the number of OpenMP threads,
+``GPU\_\+Blocks.\#'' for the number of GPU thread-blocks, and
+``GPU\_\+Threads.\#'' of the number of GPU threads-per-block.
+
+At this point, the compile time and runtime environment for the code is
+completely specified, the code is run, and the results are stored in
+appropriate subdirectory.  One file, ``try.\#'', is created for the output
+of each experiment.
+
+The format of the ``try.\#'' output will be documented here in future releases
+of the ERT.
+
+\subsection{Processed Results}
+
+Next the individual results are
+processed to produce individual graphs and summaries.  Then these summaries
+are combined to produce the final ERT output for the overall set of runs.
+
+In addition, a significant amount of metadata is carried along through this
+process.  This includes timestamps, the ERT configuration file, specific
+number for flops/element, MPI processes, OpenMP threads, etc.
+
+In each of subdirectories under each ``FLOPS.\#'' directory containing the
+``try.\#'' output (see above), the independent run/experiments are combined
+into one result by finding the minimum, median, and maximum bandwidths and
+GFLOP rates over the runs and storing this information in a file named
+``pre''.
+
+Then the maximum bandwidth and gflop rate for each working set size is
+extracted from ``pre'' and stored in ``max''.  Finally, histograms are used to
+determine plateaus in the ``max'' data and, along with using the absolute
+maximum, the roofline results are determined for all of the experiments.
+This result is stored in ``sum''.
+
+The format of all these summary files will be documented here in future
+releases of the ERT.
+
+In all cases, the metadata is propagated with the processed data.  Four graphs
+are created based on this processed data
+unless the ``-{}-no-gnuplot'' option is specified:
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``graph1.ps'' - a graph of all the bandwidth data in ``pre'' that shows
+run time versus the number of trials for each working set size.  It is
+expected that this graph will be set of lines with slope 1.0 as the runtime
+should vary linearly with the number of trials once any constant overheads
+outside the trial loop are overcome.}
+
+\vspace{-0.1in}
+\item{``graph2.ps'' - a graph of all the bandwidth data in ``pre'' that shows
+working set size versus gbytes/sec.  The lines connect the result for various
+numbers of trails where the working set is constant. The maximum envelope of
+this graph is ``graph3.ps''.}
+
+\vspace{-0.1in}
+\item{``graph3.ps'' - a graph of maximum of the bandwidth data from ``max''
+for each working set size.}
+
+\vspace{-0.1in}
+\item{``graph4.ps'' - a graph of maximum of the GFLOPs/sec data from ``max''
+for each working set size.}
+
+\end{itemize}
+
+These graphs are useful in diagnosing problems in the overall results of the
+ERT.  They are also interesting in their own right as they give detailed
+information about the behavior of the architecture and compiler for each
+parameter choices, the behavior as a function of work set size, etc.
+
+\subsection{Final Results}
+\label{subsection:final_results}
+
+All the individual results are combined into two final results
+unless the ``-{}-no-gnuplot'' option is specified then only the JSON output
+is generated.
+Both are stored directly under the ``Run.\#'' directory:  
+
+\begin{itemize}
+
+\vspace{-0.1in}
+\item{``roofline.ps'' - the roofline graph extracted from all the runs made
+using the configuration file, ``config.ert'' (also stored in this directory).}
+
+\vspace{-0.1in}
+\item{``roofline.json'' - the parameters used to generate the roofline graph
+along with all the relevant metadata.  The format of this data needs to be
+fully documented but the output is formatted in a way that makes it fairly
+easy to see the structural details.  Also, there is separate metadata for the
+bandwidth results and the gflop rate results because these, typically, come
+from runs with different parameters.  Ideally, the metadata they have in
+common should be factored out and placed at a higher level in JSON database
+structure with on the differences appearing at the lower levels.}
+
+\end{itemize}
+
+\subsection{Restarting/Continuing Runs}
+
+If the configuration file used is identical, an interrupted/incomplete run
+will start from where it left off.  It will repeat all of the building and
+post processing but it won't rerun any code that has already run to
+completion.
+
+This capability needs to be made more modular and flexible but it provides
+some needed functionality even in it's current form.
+
+\subsection{Graphs}
+
+All the graphs generated by the ERT are produced using GNUplot and a GNUplot
+script file.
+The ``-{}-no-gnuplot'' option disables the production of these graphs and the
+associated GNUplot script files.
+For a given graph, ``graph.ps'', there will also be a GNUplot
+script file, ``graph.gnu'', in the same directory.  The graph can be
+regenerated by running GNUplot and typing the command `load ``graph.gnu'''.
+
+If you want to modify any graph produced by the ERT, you can use the GNUplot
+script as a starting point and modify it as needed to produce the graph you
+would like.  This includes modifying titles and labels, adjusting axes, moving
+and adding text, etc.

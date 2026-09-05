@@ -1,0 +1,14 @@
+#!/bin/bash
+#BSUB -P <project123>
+#BSUB -W 60
+#BSUB -nnodes 1 
+
+module load cuda
+module load gnuplot 
+module load python/2.7.15-anaconda2-5.3.0
+
+cd $MEMBERWORK/<projid>/<ERT directory>
+
+jsrun -n 1 -a 1 -g 1 ./ert --verbose=2 Config/config.summit.ornl.gov.gpu
+
+

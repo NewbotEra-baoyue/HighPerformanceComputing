@@ -1,0 +1,38 @@
+
+ERT_RESULTS Results.sycl.v100
+
+ERT_DRIVER  driver1
+ERT_KERNEL  kernel1
+#with mode ERT_SYCL, the kernel run is always the SYCL kernel written in driver1.cxx in a single source manner
+
+
+ERT_FLOPS   1,2,64,128,256
+#ERT_FLOPS   1,256
+ERT_ALIGN   32
+
+ERT_CC      clang++
+ERT_CFLAGS  -std=c++17 -O3 -fsycl -I/soft/compilers/llvm-intel-sycl/20191004/lib/clang/10.0.0/include/
+#Note: it appears the -O3 flag or the -ffast-math flag is need for the kernel to use FMA instructions for max FLOP/s
+
+ERT_LD      clang++
+ERT_LDFLAGS 
+ERT_LDLIBS  -lOpenCL -fsycl
+
+ERT_RUN     ./ERT_CODE
+
+ERT_PRECISION   FP64
+
+ERT_SYCL    True
+
+ERT_SYCL_SIZES 16128:128,81920:128,163840:256,327680:256
+
+ERT_NUM_EXPERIMENTS 1
+
+ERT_MEMORY_MAX 2147483648
+
+ERT_WORKING_SET_MIN 128
+
+ERT_TRIALS_MIN 1
+
+ERT_GNUPLOT gnuplot
+

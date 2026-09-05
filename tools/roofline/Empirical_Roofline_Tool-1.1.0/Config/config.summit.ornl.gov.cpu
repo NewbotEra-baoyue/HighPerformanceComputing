@@ -1,0 +1,42 @@
+# IBM P9 CPU
+ 
+ERT_RESULTS Results.summit.ornl.gov.cpu
+ 
+ERT_DRIVER  driver1
+ERT_KERNEL  kernel1
+ 
+ERT_MPI         True
+ERT_MPI_CFLAGS
+ERT_MPI_LDFLAGS
+ 
+ERT_OPENMP         False
+ERT_OPENMP_CFLAGS  -fopenmp
+ERT_OPENMP_LDFLAGS -fopenmp
+ 
+ERT_FLOPS   1,2,4,8,16
+ERT_ALIGN   32
+ 
+ERT_CC      mpicxx
+ERT_CFLAGS  -O3
+ 
+ERT_LD      mpicxx
+ERT_LDFLAGS
+ERT_LDLIBS
+ 
+ERT_PRECISION FP64
+ 
+ERT_RUN     jsrun -a ERT_MPI_PROCS -c ERT_MPI_PROCS -n 1 -r 1 -g 0 -d plane:1 -b packed:1 -l cpu-cpu ./ERT_CODE
+ 
+ERT_PROCS_THREADS  42
+ERT_MPI_PROCS      7
+ERT_OPENMP_THREADS 1
+ 
+ERT_NUM_EXPERIMENTS 5
+ 
+ERT_MEMORY_MAX 1073741824
+ 
+ERT_WORKING_SET_MIN 128
+ 
+ERT_TRIALS_MIN 1
+ 
+ERT_GNUPLOT gnuplot

@@ -1,0 +1,29 @@
+This section contains a list of suggestions from the developers and testers
+of the ERT that have helped us get the ERT working when it hasn't
+successfully run to completion.  Hopefully, they will be helpful if you need
+to troubleshoot problems running the ERT with on your own machines with your 
+own configuration files.
+
+The easiest step, which should probably be your first step, it do get the most
+output possible from the ERT.  To do this use the ``-{}-verbose=2'' option.
+This will cause the ERT to print all the commands it is attempting to execute -
+including the final command before the ERT failed.
+
+Often, simply looking at the last command will help identify the problem.  If
+not, look at the previous commands to see if they seem to be constructed
+correctly to build, link, and run the ERT micro-kernel.
+
+If this doesn't indicate why things failed, you can try to run the last
+command interactively and see what happens.  This sometimes generates
+errors/warnings that weren't shown when the command was run within the ERT.
+
+If the last command is the running of the micro-kernel, all output (and
+errors) will be redirected to a file shown on the command output.  There will
+be a rather long path to the file and the file will have the name ``try.\#''
+where ``\#'' is a number.  Look in this file for any and all output resulting
+from running the micro-kernel - including error messages.
+
+If you are still having a problem after trying these suggestions or if it
+isn't clear how to follow some of them, feel free to contact us using the
+contact information on the WWW site where you obtained the Roofline Toolkit.
+We can then work with you to get the ERT running for you.
